@@ -14,25 +14,26 @@ One-click installers — no Node.js or terminal required.
 
 All releases: [github.com/Anil-matcha/Open-Higgsfield-AI/releases](https://github.com/Anil-matcha/Open-Higgsfield-AI/releases)
 
-### macOS Installation — "damaged and can't be opened" fix
+### macOS Installation Guide
 
-Because the app is not code-signed, macOS Gatekeeper will block it with a **"damaged and can't be opened"** message. This is expected — the file is fine. Fix it with one Terminal command:
+Because the app is not notarized by Apple, macOS Gatekeeper will block it on first launch. Follow these steps:
 
-**Step 1** — Open the DMG (it will mount even if the warning appears)
+**Step 1** — Mount the DMG and drag the app to `/Applications`
 
 **Step 2** — Open Terminal and run:
-```bash
-xattr -cr "/Volumes/Open Higgsfield AI/Open Higgsfield AI.app"
-```
-
-**Step 3** — Drag the app to `/Applications`, then open it normally.
-
-If you already copied it to Applications before running the command:
 ```bash
 xattr -cr "/Applications/Open Higgsfield AI.app"
 ```
 
-> Alternatively: after attempting to open, go to **System Settings → Privacy & Security** → scroll down → click **"Open Anyway"**.
+**Step 3** — Right-click the app in `/Applications` → click **Open** → click **Open** again on the dialog
+
+> You only need to do this once. After that, the app opens normally.
+
+**Alternative (no Terminal):**
+1. Try to open the app — macOS will block it
+2. Go to **System Settings → Privacy & Security**
+3. Scroll down to find _"Open Higgsfield AI was blocked"_
+4. Click **Open Anyway** → **Open**
 
 ### Windows Installation — SmartScreen warning fix
 
@@ -211,20 +212,20 @@ Every image you upload is saved locally (URL + thumbnail) so you never upload th
 git clone https://github.com/Anil-matcha/Open-Higgsfield-AI.git
 cd Open-Higgsfield-AI
 
-# Install dependencies
+# Install dependencies (installs root + packages/studio workspace)
 npm install
 
 # Start the development server
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser. You'll be prompted to enter your Muapi API key on first use.
+Open `http://localhost:3000` in your browser. You'll be prompted to enter your Muapi API key on first use.
 
 ### Production Build
 
 ```bash
 npm run build
-npm run preview
+npm run start
 ```
 
 ### Desktop App Build
@@ -246,30 +247,35 @@ Installers are output to the `release/` folder. Pre-built binaries are also avai
 
 ## 🏗️ Architecture
 
+The app is a **Next.js monorepo** with a shared `packages/studio` component library.
+
 ```
-src/
+Open-Higgsfield-AI/
+├── app/                        # Next.js App Router
+│   ├── layout.js               # Root layout (Tailwind, fonts)
+│   ├── page.js                 # Redirects → /studio
+│   └── studio/
+│       └── page.js             # Studio page — renders StandaloneShell
 ├── components/
-│   ├── ImageStudio.js    # Dual-mode t2i/i2i studio with dynamic model switching & multi-image support
-│   ├── VideoStudio.js    # Dual-mode t2v/i2v studio with dynamic model switching
-│   ├── LipSyncStudio.js  # Lip sync studio: portrait image/video + audio → talking video (9 models)
-│   ├── CinemaStudio.js   # Pro studio with camera controls & infinite canvas flow
-│   ├── UploadPicker.js   # Upload button + history panel; single & multi-image select modes
-│   ├── CameraControls.js # Scrollable picker for camera/lens/focal/aperture
-│   ├── Header.js         # App header with navigation (Image, Video, Lip Sync, Cinema Studio…)
-│   ├── AuthModal.js      # API key input modal
-│   ├── SettingsModal.js  # Settings panel for API key management
-│   └── Sidebar.js        # Navigation sidebar
-├── lib/
-│   ├── muapi.js          # API client: generateImage, generateVideo, generateI2I, generateI2V, processV2V, processLipSync, uploadFile
-│   ├── models.js         # 200+ model definitions: t2i, i2i, t2v, i2v, v2v, lipsync arrays with endpoints & input schemas
-│   └── uploadHistory.js  # localStorage CRUD + canvas thumbnail generation for upload history
-├── styles/
-│   ├── global.css        # Global styles and animations
-│   ├── studio.css        # Studio-specific styles
-│   └── variables.css     # CSS custom properties
-├── main.js               # App entry point & router (image / video / lipsync / cinema)
-└── style.css             # Tailwind imports
+│   ├── StandaloneShell.js      # Tab nav + BYOK (API key from localStorage)
+│   └── ApiKeyModal.js          # API key entry modal
+├── packages/
+│   └── studio/                 # Shared React component library
+│       └── src/
+│           ├── index.js        # Exports: ImageStudio, VideoStudio, LipSyncStudio, CinemaStudio
+│           ├── models.js       # 200+ model definitions (single source of truth)
+│           ├── muapi.js        # API client (named exports, apiKey as first param)
+│           └── components/
+│               ├── ImageStudio.jsx    # Dual-mode t2i/i2i studio
+│               ├── VideoStudio.jsx    # Dual-mode t2v/i2v studio
+│               ├── LipSyncStudio.jsx  # Portrait/video + audio → talking video
+│               └── CinemaStudio.jsx   # Pro studio with camera controls
+├── next.config.mjs             # transpilePackages: ['studio']
+├── tailwind.config.js
+└── package.json                # workspaces: ["packages/studio"]
 ```
+
+The `packages/studio` library is also consumed by the hosted version on [muapi.ai](https://muapi.ai) — model updates made in `packages/studio/src/models.js` apply to both the self-hosted app and the hosted version automatically.
 
 ## 🔌 API Integration
 
@@ -296,9 +302,10 @@ Lip sync jobs use the same two-step pattern: a dedicated `processLipSync()` meth
 
 ## 🛠️ Tech Stack
 
-- **Vite** — Build tool & dev server
-- **Tailwind CSS v4** — Utility-first styling
-- **Vanilla JS** — No framework, pure DOM manipulation
+- **Next.js 14** — App Router, server components, fast dev server
+- **React 18** — Studio UI components
+- **Tailwind CSS v3** — Utility-first styling
+- **npm workspaces** — Monorepo with shared `packages/studio` library
 - **Muapi.ai** — AI model API gateway
 
 ## 🤔 How is this different from Higgsfield AI?
