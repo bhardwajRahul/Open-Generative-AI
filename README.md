@@ -391,6 +391,13 @@ Every image you upload is saved locally (URL + thumbnail) so you never upload th
 
 ### Setup
 
+> **Most users want the desktop app, not this dev path.** If you just want to run Open Generative AI on your machine, [download a prebuilt installer](#-download-desktop-app) instead — no Node.js required. The instructions below are for contributors building from source.
+
+Pick the entry point that matches your goal:
+
+- **Desktop app (Electron)** → `npm run electron:dev`
+- **Hosted web version (Next.js)** → `npm run dev`
+
 ```bash
 # Clone the repository (with submodules — required for the workflow + agent packages)
 git clone --recurse-submodules https://github.com/Anil-matcha/Open-Generative-AI.git
@@ -399,14 +406,19 @@ cd Open-Generative-AI
 # If you already cloned without --recurse-submodules, run this once:
 # git submodule update --init --recursive
 
-# Install dependencies (installs root + packages/studio workspace)
-npm install
+# Install dependencies + build workspace packages (studio, workflow, agents).
+# This step is REQUIRED — `npm install` alone is not enough; the workspaces
+# need to be built before either dev script will work.
+npm run setup
 
-# Start the development server
-npm run dev
+# Then start ONE of:
+npm run electron:dev   # Desktop app (Electron + Vite) — recommended
+npm run dev            # Hosted web version (Next.js) → http://localhost:3000
 ```
 
-Open `http://localhost:3000` in your browser. You'll be prompted to enter your Muapi API key on first use.
+You'll be prompted to enter your Muapi API key on first use (skip the key if you only plan to use local models).
+
+> **Troubleshooting — `Couldn't find a 'pages' directory`**: this means Next.js can't see the `app/` folder. Confirm you're running `npm run dev` from the repo root (the directory that contains `app/`, `package.json`, and `next.config.mjs`), and that you cloned with submodules. Re-run `npm run setup` if `packages/Vibe-Workflow` or `packages/Open-Poe-AI` are empty.
 
 ### Production Build
 
