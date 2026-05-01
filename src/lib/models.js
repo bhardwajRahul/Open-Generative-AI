@@ -1824,6 +1824,50 @@ export const t2iModels = [
     }
   },
   {
+    "id": "gpt-image-2",
+    "name": "Gpt Image 2",
+    "endpoint": "gpt-image-2-text-to-image",
+    "family": "gpt-2",
+    "inputs": {
+      "prompt": {
+        "examples": [
+          "A photorealistic product photo of a luxury watch resting on a slab of black marble, dramatic cinematic lighting with a soft rim glow, ultra-detailed metallic textures, shallow depth of field, studio quality."
+        ],
+        "description": "Text prompt describing the image. Up to 20,000 characters supported.",
+        "type": "string",
+        "title": "Prompt",
+        "name": "prompt"
+      },
+      "aspect_ratio": {
+        "enum": [
+          "auto",
+          "1:1",
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4"
+        ],
+        "title": "Aspect Ratio",
+        "name": "aspect_ratio",
+        "type": "string",
+        "description": "Aspect ratio of the output image.",
+        "default": "auto"
+      },
+      "resolution": {
+        "enum": [
+          "1K",
+          "2K",
+          "4K"
+        ],
+        "title": "Resolution",
+        "name": "resolution",
+        "type": "string",
+        "description": "The target resolution of the generated image.",
+        "default": "2K"
+      }
+    }
+  },
+  {
     "id": "wan2.6-text-to-image",
     "name": "Wan2.6 Text To Image",
     "inputs": {
@@ -4550,6 +4594,53 @@ export const i2iModels = [
         "minValue": 256,
         "maxValue": 1536,
         "step": 1
+      }
+    }
+  },
+  {
+    "id": "gpt-image-2-edit",
+    "name": "Gpt Image 2 Edit",
+    "endpoint": "gpt-image-2-image-to-image",
+    "family": "gpt-2",
+    "imageField": "images_list",
+    "hasPrompt": true,
+    "maxImages": 16,
+    "inputs": {
+      "prompt": {
+        "type": "string",
+        "title": "Prompt",
+        "name": "prompt",
+        "description": "Text prompt describing the transformation. Up to 20,000 characters supported.",
+        "examples": [
+          "Transform these product photos into a professional lifestyle scene with warm cinematic lighting, soft natural shadows, and a clean modern background; keep brand details and proportions unchanged."
+        ]
+      },
+      "aspect_ratio": {
+        "type": "string",
+        "title": "Aspect Ratio",
+        "name": "aspect_ratio",
+        "description": "Aspect ratio of the output image.",
+        "enum": [
+          "auto",
+          "1:1",
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:4"
+        ],
+        "default": "auto"
+      },
+      "resolution": {
+        "type": "string",
+        "title": "Resolution",
+        "name": "resolution",
+        "description": "The target resolution of the generated image.",
+        "enum": [
+          "1K",
+          "2K",
+          "4K"
+        ],
+        "default": "2K"
       }
     }
   },
